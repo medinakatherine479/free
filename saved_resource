@@ -1,0 +1,174 @@
+
+$( document ).ready(function() {
+	add_style_css();
+});
+
+( function(){
+	var termsagreement = {
+		config: {
+			'page_type' : meta.page.pageType,
+			'settings' :  "{\"checkbox_settings\":{\"checkbox_text\":\"I have read, understood and accept the terms & condition.\",\"terms_condition_url\":\"https:\\\/\\\/www.simplififabric.ca\\\/pages\\\/terms-and-conditions\",\"default_checkbox\":\"1\"},\"design_settings\":{\"checkbox_text_color\":\"rgb(145, 145, 145)\",\"checkbox_font_size\":\"14\",\"checkbox_font_style\":\"inherit\",\"checkbox_font_weight\":\"inherit\"},\"layouts\":{\"frontend_layout\":\"frontend_layout_3\"}}",
+			'add_to_cart_form' : jQuery('form[action="/cart/add"]')
+		}
+	};
+
+	var status = "1";
+	var settings = termsagreement.config.settings;
+	settings = JSON.parse(settings);
+
+	if(status != 0 ){
+		var cart_table = "";
+		setTimeout(function(){
+			if( $('.rocket_cart_table')[0] ) {
+				if(Shopify.theme.name == 'Venture'){
+					cart_table +='<p class="termsagreement_container" style="width: 52vw; display: inherit; right: 0px; margin-left: auto; position: absolute; white-space: normal; padding-right: 5rem; overflow: hidden; left: calc(-14vw + 63%); min-height: 50px; z-index: 999999999999; background-color: inherit; color: inherit;">';
+				}else if(Shopify.theme.name == 'Brooklyn' || Shopify.theme.name == 'Jumpstart'){
+					cart_table +='<p class="termsagreement_container" style="width: 52vw; display: inherit; right: 0px; margin-left: auto; position: absolute; white-space: normal; padding-right: 0rem; overflow: hidden; left: calc(-14vw + 63%); min-height: 50px; z-index: 999999999999; background-color: inherit; color: inherit;">';
+				}else if(Shopify.theme.name == 'Pop'){
+					cart_table +='<p class="termsagreement_container" style="width: 70vw; display: inherit; right: 0px; margin-left: auto; position: absolute; white-space: normal; padding-right: 11rem; overflow: hidden; left: calc(-14vw + 63%); min-height: 50px; z-index: 999999999999; background-color: inherit; color: inherit;">';
+				}else if(Shopify.theme.name == 'Debut'){
+					cart_table +='<p class="termsagreement_container" style="width: 52vw; display: inherit; right: 0px; margin-left: auto; position: absolute; white-space: normal; padding-right: 6.5rem; overflow: hidden; left: calc(-14vw + 63%); min-height: 50px; z-index: 999999999999; background-color: inherit; color: inherit;">';
+				}else if(Shopify.theme.name == 'Boundless'){
+					cart_table +='<p class="termsagreement_container" style="width: 52vw; display: inherit; right: 0px; margin-left: auto; position: absolute; white-space: normal; padding-right: 4.5rem; overflow: hidden; left: calc(-14vw + 63%); min-height: 50px; z-index: 999999999999; background-color: inherit; color: inherit;">';
+				}else if(Shopify.theme.name == 'Simple'){
+					cart_table +='<p class="termsagreement_container" style="width: 52vw; display: inherit; right: 0px; margin-left: auto; position: absolute; white-space: normal; padding-right: 2.5rem; overflow: hidden; left: calc(-14vw + 63%); min-height: 50px; z-index: 999999999999; background-color: inherit; color: inherit;">';
+				}else if(Shopify.theme.name == 'Narrative'){
+					cart_table +='<p class="termsagreement_container" style="width: 52vw; display: inherit; right: 0px; margin-left: auto; position: absolute; white-space: normal; padding-right: 18rem; overflow: hidden; left: calc(-14vw + 63%); min-height: 50px; z-index: 999999999999; background-color: inherit; color: inherit;">';
+				}else{
+					cart_table +='<p class="termsagreement_container" style="width: 52vw; display: inherit; right: 0px; margin-left: auto; position: absolute; white-space: normal; padding-right: 10rem; overflow: hidden; left: calc(-14vw + 63%); min-height: 50px; z-index: 999999999999; background-color: inherit; color: inherit;">';
+				}
+			}else{
+				if(Shopify.theme.name == 'Brooklyn' || Shopify.theme.name == 'Narrative' || Shopify.theme.name == 'Pop' || Shopify.theme.name == 'Simple'){
+					cart_table +='<p class="termsagreement_container" style="width: 100%; line-height: 25px; min-height: 50px;z-index: 9999; background-color: inherit; color: inherit;">';
+				}else{
+					cart_table +='<p class="termsagreement_container" style="width: 100%;  min-height: 50px;z-index: 9999; background-color: inherit; color: inherit;">';
+				}
+			}
+				if (settings.checkbox_settings.default_checkbox == '1'){
+					cart_table+='<input id="termsagreement_radio_check" style="visibility:visible;float:none;height: 17px; width: 17px;" type="checkbox" checked="checked" name="termsagreement_radio_check" onclick="agreement_check(this);">&nbsp;&nbsp;';
+				}else{
+					cart_table+='<input id="termsagreement_radio_check" style="visibility:visible;float:none;height: 17px; width: 17px;" type="checkbox" name="termsagreement_radio_check" onclick="agreement_check(this);">&nbsp;&nbsp;';
+				}
+				if(settings.layouts.frontend_layout == 'frontend_layout_3'){
+					cart_table += '<label style="display: inline;font-family: '+settings.design_settings.checkbox_font_style+';font-weight: '+settings.design_settings.checkbox_font_weight+' !important;color: '+settings.design_settings.checkbox_text_color+';font-size: '+settings.design_settings.checkbox_font_size+'px;position: relative;top: -3px;">'+settings.checkbox_settings.checkbox_text+'</label>';
+					if(settings.checkbox_settings.terms_condition_url.match(/http/g)){
+						cart_table += "<a href='"+settings.checkbox_settings.terms_condition_url+"' style='font-family: "+settings.design_settings.checkbox_font_style+";font-weight: "+settings.design_settings.checkbox_font_weight+"!important;color: "+settings.design_settings.checkbox_text_color+";font-size: "+settings.design_settings.checkbox_font_size+"px; text-decoration: underline;position: relative;top: -3px;' target='_blank'>Read more</a>";
+					}else{
+						cart_table += "<a href='https://"+settings.checkbox_settings.terms_condition_url+"' style='font-family: "+settings.design_settings.checkbox_font_style+";font-weight: "+settings.design_settings.checkbox_font_weight+"!important;color: "+settings.design_settings.checkbox_text_color+";font-size: "+settings.design_settings.checkbox_font_size+"px; text-decoration: underline;position: relative;top: -3px;' target='_blank'>Read more</a>";
+					}
+				}else if ( settings.layouts.frontend_layout == 'frontend_layout_2'){
+					if(settings.checkbox_settings.terms_condition_url.match(/http/g)){
+						cart_table += "<a class='terms_link_in_a' style='text-decoration: underline;' href='"+settings.checkbox_settings.terms_condition_url+"' target='_blank'>";
+					}else{
+						cart_table += "<a class='terms_link_in_a' style='text-decoration: underline;' href='https://"+settings.checkbox_settings.terms_condition_url+"' target='_blank'>";
+					}
+						cart_table += '<label style="display: inline;font-family: '+settings.design_settings.checkbox_font_style+';font-weight: '+settings.design_settings.checkbox_font_weight+' !important;color: '+settings.design_settings.checkbox_text_color+';font-size: '+settings.design_settings.checkbox_font_size+'px;position: relative;top: -3px;">'+settings.checkbox_settings.checkbox_text+'</label>';
+					cart_table += '</a>';
+				}else{
+					cart_table += '<label style="display: inline;font-family: '+settings.design_settings.checkbox_font_style+';font-weight: '+settings.design_settings.checkbox_font_weight+' !important;color: '+settings.design_settings.checkbox_text_color+';font-size: '+settings.design_settings.checkbox_font_size+'px;position: relative;top: -3px;">'+settings.checkbox_settings.checkbox_text+'</label>';
+				}
+				//cart_table+='<h2 style="cursor: pointer;" for="termsagreement_radio_check">'+settings.checkbox_settings.checkbox_text+'</h2>';
+			cart_table +='</p>';
+		}, 3000);
+
+		$("a[href='/cart']").click(function(){
+			if($( ".termsagreement_container" ) && Shopify.theme.name == 'Narrative'){
+			}else if(Shopify.theme.name == 'Brooklyn' || Shopify.theme.name == 'Pop'){
+				setTimeout(function(){
+					if ( $('#EasyTermsDiv').length > 0 ) {
+						$("[id='EasyTermsDiv']").each(function(){ $(this).html(cart_table); });
+					}else{
+				 		$( cart_table ).insertAfter( $("[name='checkout']") );
+					}
+				 	$("[name='checkout']").prop("disabled",true);
+				 }, 3000 );
+			}else if($( ".termsagreement_container" ) && Shopify.theme.name == 'Brooklyn' || $( ".termsagreement_container" ) && Shopify.theme.name == 'Pop'){
+				setTimeout(function(){
+					if ( $('#EasyTermsDiv').length > 0 ) {
+						$("[id='EasyTermsDiv']").each(function(){ $(this).html(cart_table); });
+					}else{
+				 		$( cart_table ).insertAfter( $("[name='checkout']").parent().parent() );
+					}
+				 	$("[name='checkout']").prop("disabled",true);
+				 }, 3000 );
+			}else{
+				setTimeout(function(){
+					if ( $('#EasyTermsDiv').length > 0 ) {
+						$("[id='EasyTermsDiv']").each(function(){ $(this).html(cart_table); });
+					}else{
+				 		$( cart_table ).insertBefore( $("[name='checkout']") );
+					}
+				 	$("[name='checkout']").prop("disabled",true);
+				}, 3000 );
+			}
+		});
+
+
+		if ( $('#EasyTermsDiv').length > 0 ) {
+			setTimeout(function(){ 
+				if ( $('#EasyTermsDiv').length > 0 ) {
+					$("[id='EasyTermsDiv']").each(function(){ $(this).html(cart_table); });
+				}else{
+			 		$( cart_table ).insertAfter( $("[name='checkout']") );
+				}
+			}, 3000);
+		}else{
+	 		setTimeout(function(){ 
+ 				shopwise_checkbox_placement( cart_table ); 
+	 		}, 3000);
+		}
+
+		var style = $($("[name='checkout']").parent().parent()[0]).attr('style');
+		if( $('.rocket_cart_table') ) {
+			$($("[name='checkout']").parent().parent()[0]).attr('style', style+'text-align : left');
+		}
+
+		var termsagreement_check = $('#termsagreement_radio_check').is(":checked");
+		var checkout_btn = $("[name='checkout']");
+		if (settings.checkbox_settings.default_checkbox == '1'){
+			$(checkout_btn).prop("disabled",false);
+		}else{
+			$(checkout_btn).prop("disabled",true);
+		}
+	}
+
+})();
+
+function shopwise_checkbox_placement( cart_table ){
+	if ( Shopify.shop == "mean-mothers-creations.myshopify.com" && Shopify.theme.name == "Expression"){
+		$( $('.subtotal')[0] ).prepend( cart_table );
+	}else{
+		if ( $( $('.subtotal')[0] ).length > 0 ){
+			$( $('.subtotal')[0] ).prepend( cart_table );
+		}
+		else if ( $( $('.cart__footer')[0] ).length > 0 ){
+			$( $('.cart__footer')[0] ).prepend( cart_table );
+		}
+		else if ( $( $('.cart__subtotal-holder')[0] ).length > 0 ){
+			$( $('.cart__subtotal-holder')[0] ).prepend( cart_table );
+		}
+		else{
+			$( cart_table ).insertAfter( $("[name='checkout']") );
+		}
+	}
+}
+
+function agreement_check(this_ele){
+	if( $(this_ele).is(":checked") == false){
+		$($("[name='checkout']")).prop("disabled",true);
+	}else{
+		$($("[name='checkout']")).prop("disabled",false);
+	}
+}
+
+function add_style_css(){
+    var style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML= '@import url("https://fonts.googleapis.com/css?family=Arimo"); @import url("https://fonts.googleapis.com/css?family=Open+Sans"); @import url("https://fonts.googleapis.com/css?family=Lato"); @import url("https://fonts.googleapis.com/css?family=Droid+Serif"); @import url("https://fonts.googleapis.com/css?family=Neuton"); @import url("https://fonts.googleapis.com/css?family=Quattrocento"); @import url("https://fonts.googleapis.com/css?family=Architects+Daughter"); @import url("https://fonts.googleapis.com/css?family=Coming+Soon"); @import url("https://fonts.googleapis.com/css?family=Cabin+Sketch"); @import url("https://fonts.googleapis.com/css?family=Dancing+Script"); @import url("https://fonts.googleapis.com/css?family=Permanent+Marker"); @import url("https://fonts.googleapis.com/css?family=Rochester"); .terms_link_in_a:hover{text-decoration: underline;}';
+
+    if ( Shopify.shop == 'loydsdev.myshopify.com'){
+    	style.innerHTML += '.termsagreement_container{ margin-top : 10px;} .terms_link_in_a label {left: -4px;} #termsagreement_radio_check{margin-right: 0px;}';
+    }
+    
+    document.getElementsByTagName('head')[0].appendChild(style);
+}

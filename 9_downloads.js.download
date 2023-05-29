@@ -1,0 +1,306 @@
+function load() {
+    if (typeof trying != 'undefined') var trying = 0;
+    $(document).ready(function () {
+        if (typeof store_downloads_config != 'object') store_downloads_config = JSON.parse(atob(store_downloads_config));
+
+        element = document.documentElement.style;
+        if (typeof store_downloads_config['downloads/player/detail/button-player-bg-color'] != 'undefined') {
+            element.setProperty("--button-player-bg-color", store_downloads_config['downloads/player/detail/button-player-bg-color']['value']);
+            element.setProperty("--button-player-text-color", store_downloads_config['downloads/player/detail/button-player-text-color']['value']);
+            element.setProperty("--button-bg-color", store_downloads_config['downloads/player/detail/button-bg-color']['value']);
+            element.setProperty("--button-text-color", store_downloads_config['downloads/player/detail/button-text-color']['value']);
+            element.setProperty("--button-hover-player-bg-color", store_downloads_config['downloads/player/detail/button-hover-player-bg-color']['value']);
+            element.setProperty("--button-hover-player-text-color", store_downloads_config['downloads/player/detail/button-hover-player-text-color']['value']);
+            element.setProperty("--button-hover-bg-color", store_downloads_config['downloads/player/detail/button-hover-bg-color']['value']);
+            element.setProperty("--button-hover-text-color", store_downloads_config['downloads/player/detail/button-hover-text-color']['value']);
+        } else {
+            element.setProperty("--button-player-bg-color", "#8f0000");
+            element.setProperty("--button-player-text-color", "#ffffff");
+            element.setProperty("--button-bg-color", "#197bbd");
+            element.setProperty("--button-text-color", "#ffffff");
+            element.setProperty("--button-hover-player-bg-color", "#8f0000");
+            element.setProperty("--button-hover-player-text-color", "#ffffff");
+            element.setProperty("--button-hover-bg-color", "#197bbd");
+            element.setProperty("--button-hover-text-color", "#ffffff");
+        }
+
+        if (window.location.pathname.indexOf('account/orders/') != -1) {
+            var oi = $('[property="og:title"]').attr('content').split(' ');
+            if (typeof oi[1] != 'undefined') $('body').attr('id', 'order-' + oi[1].replace('#', ''));
+        }
+        if (ch = 0, url_base_ = atob(app_base_url), url_app_ = atob(app_url), -1 != $("body").attr("id") && void 0 !== $("body").attr("id") && -1 < $("body").attr("id").indexOf("order")) {
+            var a = $("body").attr("id").replace("order-", ""), o = [];
+            var _e = $(".order-table tr");
+            if (typeof _e.html() == 'undefined') _e = $("span:contains(Order #),a:contains(Order #),*:contains(Order #)").parent().find('>table tr');
+            _e.each(function () {
+                void 0 !== $(this).attr("id") && o.push($(this).attr("id"))
+            }), $.ajax({
+                url: url_app_ + "downloads/downloads/url",
+                method: "POST",
+                data: {
+                    order_id: a,
+                    items: o,
+                    shop: Shopify.shop,
+                    order_token: window.location.pathname.split("orders/")[1]
+                },
+                success: function (a) {
+                    void 0 !== a.data && $.each(a.data, function (a, o) {
+                        $.each(o.urls, function (a, d) {
+                            if (d.name == null) d.name = d.file;
+                            message = "", btn_color = (d.player == 1 ? "dr-button-style dr-player-button" : "dr-button-style dr-download-button"), "#" == d.url && (message = ___("Usage expired / Download limit exceeded"), btn_color = "dr-button-style dr-limited"), $("#" + o.id).find(">*:first-child").append('<div class="drdownloads-listing" ><a class="' + btn_color + '"  href="' + d.url + '" '+ (d.file == null ? "target='_blank'" + "aria-o='"+a+"' aria-f='"+d.f+"'" : "") + '>' + d.name + ((d.player == 1) ? " " + ___("Play") : " " + ___("Download")) + "</a>" + ("No" == d.security.type || d.player == 1 ? "" : d.security.type + " : <input onclick='this.select();document.execCommand(\"copy\");' readonly class='drdownloads-key' value='" + d.security.data + "'><br>") + "<span style='color:red;'>" + message + "</span></div>"), 0 == ch && ($("main .section:last-child > div").append('<div class="content-box"><div class="content-box__row"><h2>' + ___("Downloads") + '</h2>' + $(".product-table").parent().html() + "</div></div>"), ch = 1)
+                        })
+                    })
+                    $('.drdownloads-key').each(function () {
+                        $(this).attr('size', $(this).val().length + 2);
+                    });
+                    if (typeof $('.drdownloads-listing').html() != 'undefined') {
+                        $('.product').each(function () {
+                            if (typeof $(this).find('.drdownloads-listing').html() == 'undefined') {
+                                $(this).parent().append($(this).clone());
+                                $(this).remove();
+                            }
+                        });
+                    } else {
+                        trying += 1;
+                        if (trying < 3) setTimeout(load(), 1000);
+                    }
+                }
+            });
+        }
+        if (0 < $(".product-table").length) {
+            var d = [], e = $("span:contains(Order #),a:contains(Order #)").text().trim().replace("Order #", "");
+            $("[data-product-id]").each(function () {
+                d.push({product_id: $(this).attr("data-product-id"), variant_id: $(this).attr("data-variant-id")})
+            }), 0 < d.length && $.ajax({
+                url: url_app_ + "downloads/downloads/url",
+                method: "POST",
+                data: {
+                    products: d,
+                    shop: Shopify.shop,
+                    order_token: window.location.pathname.split("orders/")[1],
+                    order: Shopify.checkout,
+                    order_id: e,
+                    send_order: !0
+                },
+                success: function (a) {
+                    void 0 !== a.data && $.each(a.data, function (c, o) {
+                        if (typeof o.urls != 'undefined') {
+                            $.each(o.urls, function (f, d) {
+                                if (d.name == null) d.name = d.file;
+                                th = $('[data-product-id="' + o.product_id + '"][data-variant-id="' + o.variant_id + '"]').find("th"), message = "", btn_color = (d.player == 1 ? "dr-button-style dr-player-button" : "dr-button-style dr-download-button"), "#" == d.url && (message = ___("Usage expired / Download limit exceeded"), btn_color = "dr-button-style dr-limited"), th.append('<div class="drdownloads-listing"><a class="' + btn_color + '"  href="' + d.url +  '" '+(d.file == null ? "target='_blank'" + "aria-o='"+e+"' aria-f='"+d.f+"'" : "")+' >' + d.name + ((d.player == 1) ? " " + ___("Play") : " " + ___("Download")) + "</a>" + ("No" == d.security.type || d.player == 1 ? "" : d.security.type + " : <input readonly onclick='this.select();document.execCommand(\"copy\");' class='drdownloads-key' value='" + d.security.data + "'><br>") + "<span style='color:red;'>" + message + "</span></div>"), 0 == ch && ($("main .section:last-child > div").append('<div class="content-box"><div class="content-box__row"><h2>' + ___("Downloads") + '</h2>' + $(".product-table").parent().html() + "</div></div>"), ch = 1)
+                            })
+                        }
+                    })
+                    $('.drdownloads-key').each(function () {
+                        $(this).attr('size', $(this).val().length + 2);
+                    });
+                }
+            })
+        }
+        examp = 0;
+        if ("product" == meta.page.pageType && examp != 0) {
+            var t = new URL(document.location).searchParams.get("variant");
+            null == t && (t = meta.product.variants[0].id), $.ajax({
+                url: url_app_ + "downloads/downloads/url",
+                method: "POST",
+                data: {products: meta.product, type_product: !0, shop: Shopify.shop, order_token: ""},
+                success: function (a) {
+                    window.downloads = a.data, 0 == window.downloads.length || (0 < $("main").html().length ? $("main > div:first-of-type").append("<div class='ecommergency-downloads'><div class='ecom-title'>Downloads sample files</div><div class='ecom-sample'></div></div>") : 0 < $("#product").html().length && $("#product > div:first-of-type").append("<div class='ecommergency-downloads'><div class='ecom-title'>" + ___("Downloads sample files") + "</div><div class='ecom-sample'></div></div>"), $(".ecom-sample").html(""), void 0 !== a.data.product && $.each(a.data.product.urls, function (a,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  o) {
+                        $(".ecom-sample").append("<li><a href='" + o.url + "'>" + o.name + " Sample</a></li>")
+                    }), void 0 !== window.downloads.variants && void 0 !== window.downloads.variants[t] && $.each(window.downloads.variants[t].urls, function (a,
+                                                                                                                                                               o) {
+                        $(".ecom-sample").append("<li><a href='" + o.url + "'>" + o.name + " Sample</a></li>")
+                    }), 0 == $(".ecom-sample").html().length && $(".ecom-sample").append("<li>No Sample</li>"))
+                    $('.drdownloads-key').each(function () {
+                        $(this).attr('size', $(this).val().length + 2);
+                    });
+                }
+            }), $(document).change(function () {
+                let a = new URL(document.location).searchParams;
+                t = a.get("variant"), $(".ecom-sample").html(""), void 0 !== window.downloads.variants && (void 0 === window.downloads.variants[t] ? $(".ecom-sample").append("<li>No Sample</li>") : $.each(window.downloads.variants[t].urls, function (a,
+                                                                                                                                                                                                                                                          o) {
+                    $(".ecom-sample").append("<li><a href='" + o.url + "'>" + o.file + "</a></li>")
+                }))
+            })
+        }
+
+        var getCustomerId = function () {
+            try {
+                let curr = window.ShopifyAnalytics.meta.page.customerId;
+                if (curr !== undefined && curr !== null && curr !== "") {
+                    return curr;
+                }
+            } catch (e) {
+            }
+            try {
+                let curr = window.meta.page.customerId;
+                if (curr !== undefined && curr !== null && curr !== "") {
+                    return curr;
+                }
+            } catch (e) {
+            }
+            try {
+                let curr = _st.cid;
+                if (curr !== undefined && curr !== null && curr !== "") {
+                    return curr;
+                }
+            } catch (e) {
+            }
+            try {
+                return null;
+                let curr = ShopifyAnalytics.lib.user().traits().uniqToken;
+                if (curr !== undefined && curr !== null && curr !== "") {
+                    return parseInt(curr);
+                }
+            } catch (e) {
+            }
+            return null;
+        }
+        if ((customer_id = getCustomerId()) > 0 && typeof store_downloads_config['downloads/settings/download_button'] != 'undefined') {
+            if (store_downloads_config['downloads/settings/download_button']['value'] == 'active') {
+                download_link = $("[href='/account']").parent();
+                if (typeof store_downloads_config['downloads/settings/button_element'] != 'undefined') {
+                    if (store_downloads_config['downloads/settings/button_element']['value'] != null) {
+                        if (store_downloads_config['downloads/settings/button_element']['value'].length > 0) {
+                            var link = store_downloads_config['downloads/settings/button_element']['value'];
+                            if (link.indexOf(")") != -1) {
+                                download_link = eval(link);
+                            } else {
+                                download_link = $(store_downloads_config['downloads/settings/button_element']['value']);
+                            }
+                        }
+                    }
+                }
+                download_link.append('<a href="/pages/digital-files-player-and-download" class="drawer__nav-link drawer__nav-link--top-level" style="z-index:5;margin-left:5px; background: rgba(54 ,147, 152 , 0.25);border-radius:5px;padding:9px;" id="dr-downloads-customer-link">' + ___("Downloads") + '</a>');
+            }
+        }
+        if (window.location.pathname.indexOf('digital-files-player-and-download') != -1 || typeof $('#drdownloads-container').html() != 'undefined') {
+            var url_params = new URL(location.href).searchParams;
+            if (url_params.get('token') != null && url_params.get('file_id')) {
+                var __data = {token: url_params.get('token'), file_id: url_params.get('file_id')};
+            } else if ((customer_id = getCustomerId()) > 0) {
+                var __data = {customer_id: getCustomerId()};
+            }
+            $.ajax({
+                url: url_app_ + "downloads/downloads/player",
+                method: "POST",
+                data: __data,
+                success: function (a) {
+                    if (typeof a.data != 'undefined') {
+                        $('#drdownloads-container').append(JSON.parse(atob(a.data)));
+                    }
+                }
+            })
+        }
+        if (typeof store_downloads_config['downloads/free/status'] != 'undefined' && "product" == meta.page.pageType) {
+            if (store_downloads_config['downloads/free/status']['value'] == 'active') {
+                free_limit = store_downloads_config['downloads/free/limit']['value'];
+                var free_button = $('.btn[name="add"]').parent();
+                if (typeof store_downloads_config['downloads/settings/free_button_element'] != 'undefined') {
+                    if (store_downloads_config['downloads/settings/free_button_element']['value'] == null) store_downloads_config['downloads/settings/free_button_element']['value'] = "";
+                    if (store_downloads_config['downloads/settings/free_button_element']['value'].length > 0) free_button = $(store_downloads_config['downloads/settings/free_button_element']['value']);
+                }
+                element = document.documentElement.style;
+                element.setProperty("--free-list-active-bg-color", store_downloads_config['downloads/player/detail/list-active-bg-color']['value']);
+                element.setProperty("--free-list-active-text-color", store_downloads_config['downloads/player/detail/list-active-text-color']['value']);
+                element.setProperty("--free-list-hover-bg-color", store_downloads_config['downloads/player/detail/list-hover-bg-color']['value']);
+                element.setProperty("--free-list-hover-text-color", store_downloads_config['downloads/player/detail/list-hover-text-color']['value']);
+                if (free_button.length > 0) {
+                    var loginAtt = false;
+                    if (typeof store_downloads_config['downloads/free/login'] != "undefined") {
+                        if (store_downloads_config['downloads/free/login']['value'] == 'active') loginAtt = true;
+                    }
+                    if (loginAtt == true && (customer_id = getCustomerId()) > 0) loginAtt = false;
+                    if (loginAtt == true) {
+                        free_button.append("<button type='button' onclick='window.location.href=\"/account/login?return_url=" + window.location.pathname + "\"'  class='btn product-form__cart-submit btn--add-to-cart drdownloads-button'>" + ___("Download after login") + "</button>");
+                    } else {
+                        var t = new URL(document.location).searchParams.get("variant");
+                        null == t && (t = meta.product.variants[0].id), $.ajax({
+                            url: url_app_ + "downloads/downloads/url",
+                            method: "POST",
+                            data: {products: meta.product, type_product: !0, shop: Shopify.shop, order_token: ""},
+                            success: function (a) {
+                                if (typeof a.data != 'undefined') {
+                                    window.downloads = a.data;
+                                    if (typeof a.data.limit != 'undefined') {
+                                        free_button.append("<button type='button'  class='btn product-form__cart-submit btn--add-to-cart drdownloads-button' disabled='disabled'>" + ___("Free download limit reached") + "</button>");
+                                    } else if (typeof a.data.product != 'undefined') {
+                                        if (Object.keys(a.data.product.urls).length == 1) {
+                                            if (typeof a.data.product.urls != 'undefined') {
+                                                dd = a.data.product.urls[0];
+                                                free_button.append("<button type='button' onclick='DrDownloadCryptUrl(\"" + dd.url + "\"," + customer_id + ")'  class='btn product-form__cart-submit btn--add-to-cart drdownloads-button'>" + dd.name + " " + ___("Downloads") + "</button>");
+                                            }
+                                        } else {
+                                            window.downloads = a.data, 0 == window.downloads.length || (0 < $("main").html().length ? $("main > div:first-of-type > div:first-of-type").append("<div class='ecommergency-downloads'><div class='ecom-title'>" + ___("Downloads free files") + "</div><div class='ecom-sample'></div></div>") : 0 < $("#product").html().length && $("#product > div:first-of-type").append("<div class='ecommergency-downloads'><div class='ecom-title'>" + ___("Downloads free files") + "</div><div class='ecom-sample'></div></div>"), $(".ecom-sample").html(""), void 0 !== a.data.product && $.each(a.data.product.urls, function (a,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         o) {
+                                                $(".ecom-sample").append("<li style='float:left;margin:5px;list-style: none;'><a class='btn product-form__cart-submit btn--add-to-cart drdownloads-button' href='javascript:DrDownloadCryptUrl(\"" + o.url + "\"," + customer_id + ");'>" + o.name + " " + ___("Downloads") + "</a></li>")
+                                            }));
+                                        }
+                                    } else if (typeof a.data.variants != 'undefined') {
+                                        window.downloads = a.data, 0 == window.downloads.variants.length || (0 < $("main").html().length ? $("main > div:first-of-type > div:first-of-type").append("<div class='ecommergency-downloads'><div class='ecom-title'>" + ___("Downloads free files") + "</div><div class='ecom-sample'></div></div>") : 0 < $("#product").html().length && $("#product > div:first-of-type").append("<div class='ecommergency-downloads'><div class='ecom-title'>" + ___("Downloads free files") + "</div><div class='ecom-sample'></div></div>"), $(".ecom-sample").html(""), void 0 !== window.downloads.variants[t] && $.each(window.downloads.variants[t]['urls'], function (a,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             o) {
+                                            $(".ecom-sample").append("<li style='float:left;margin:5px;list-style: none;'><a class='btn product-form__cart-submit btn--add-to-cart drdownloads-button' href='javascript:DrDownloadCryptUrl(\"" + o.url + "\"," + customer_id + ");'>" + o.name + " " + ___("Downloads") + "</a></li>")
+                                        }));
+                                    }
+                                    if (typeof $('.ecommergency-downloads').html() != 'undefined') {
+                                        free_button.append("<button type='button' onclick='$(\"html, body\").animate({scrollTop: $(\".ecommergency-downloads\").offset().top - 60});'  class='btn product-form__cart-submit btn--add-to-cart drdownloads-button'>" + ___("Downloads free files") + "</button>");
+                                    }
+                                }
+                            }
+                        }), $(document).change(function () {
+                            if (typeof window.downloads != 'undefined') {
+                                if (typeof window.downloads.variants != 'undefined') {
+                                    let a = new URL(document.location).searchParams;
+                                    t = a.get("variant"), $(".ecom-sample").html(""), void 0 !== window.downloads.variants && (void 0 === window.downloads.variants[t] ? $(".ecom-sample").append("<li></li>") : $.each(window.downloads.variants[t].urls, function (a,
+                                                                                                                                                                                                                                                                     o) {
+                                        $(".ecom-sample").append("<li style='float:left;margin:5px;list-style: none;'><a class='btn product-form__cart-submit btn--add-to-cart drdownloads-button' href='javascript:DrDownloadCryptUrl(\"" + o.url + "\"," + customer_id + ");'>" + o.name + " " + ___("Downloads") + "</a></li>")
+                                    }))
+                                }
+                            }
+                        })
+                    }
+                }
+            }
+        }
+        $(document).on('click', '.drdownloads-listing a[target="_blank"]', function () {
+            if (typeof $(this).attr('aria-o') != 'undefined' && typeof $(this).attr('aria-f') != 'undefined') {
+                if ($(this).attr('aria-o').length > 0 && $(this).attr('aria-f').length > 0) {
+                    $.ajax({
+                        url: url_app_ + "downloads/downloads/blank",
+                        method: "POST",
+                        data: {
+                            o: $(this).attr('aria-o'),
+                            f: $(this).attr('aria-f'),
+                            shop: Shopify.shop,
+                            order_token: window.location.pathname.split("orders/")[1]
+                        }
+                    });
+                }
+            }
+        });
+    });
+}
+
+function DrDownloadCryptUrl(crypt, customer_id) {
+    window.location.href = atob(crypt) + "/customer_id/" + customer_id + "?return=" + encodeURIComponent(window.location.href);
+    return false;
+}
+
+if (typeof window.$ != 'undefined') if (typeof window.$.ready == 'undefined') window.$ = undefined;
+typeof window.$ != 'undefined' ? load() : setTimeout(function () {
+    fn_check_f();
+}, 1);
+
+var fn_check_f = function () {
+    if (typeof window.$ != 'undefined') if (typeof window.$.ready == 'undefined') window.$ = undefined;
+    if (typeof window.$ == 'undefined') {
+        var _jquery = atob(app_base_url).replace('/shopify/downloads', '/shopify/base').replace('/shopify/reviews', '/shopify/base').replace('/shopify/announcement', '/shopify/base');
+        x = document.createElement('script');
+        x.src = 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js';
+        head.insertBefore(x, document.head.firstElementChild);
+    }
+    typeof window.$ != 'undefined' ? load() : setTimeout(function () {
+        fn_check_f();
+    }, 1);
+}

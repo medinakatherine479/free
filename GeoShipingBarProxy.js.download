@@ -1,0 +1,26 @@
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+var geoshipping_httpRequest = new XMLHttpRequest();
+// var shopname=Shopify.shop;
+// console.log(shopname);
+var mlveda_shop = document.getElementById("geoshippingbarscript").getAttribute("mlveda");
+//var httpRequest = new XMLHttpRequest();       
+// The requested file must be in the same domain that the page is served from.
+var geoshippingbar_url = "https://" + mlveda_shop + "/apps/GeoShippingBar/geoShippingBarProxy";
+geoshipping_httpRequest.open("GET", geoshippingbar_url, true);    // async
+    geoshipping_httpRequest.setRequestHeader("Accept", "text/javascript");
+
+geoshipping_httpRequest.onreadystatechange = function () {
+    if (geoshipping_httpRequest.status == 200 && geoshipping_httpRequest.readyState == 4) {
+        // defined in ajax.js
+        var scripttagcreate = document.createElement("script");
+        scripttagcreate.innerHTML = geoshipping_httpRequest.responseText;
+        $m("head").append(scripttagcreate);
+    } else {
+        //console.log("geoshippingbar  else called");
+    }
+};
+geoshipping_httpRequest.send(null);
